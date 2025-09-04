@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JiedanxiangqingDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.paotuirenwu_id as paotuirenwuId
+        ,a.jiedanyuan_id as jiedanyuanId
+        ,a.jiedanxiangqing_status_types as jiedanxiangqingStatusTypes
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JiedanxiangqingView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,jiedanyuan.jiedanyuan_name as jiedanyuanName
+        ,jiedanyuan.jiedanyuan_photo as jiedanyuanPhoto
+        ,jiedanyuan.jiedanyuan_phone as jiedanyuanPhone
+        ,jiedanyuan.jiedanyuan_email as jiedanyuanEmail
+        ,jiedanyuan.new_money as newMoney
+        ,paotuirenwu.paotuirenwu_uuid_number as paotuirenwuUuidNumber
+        ,paotuirenwu.paotuirenwu_name as paotuirenwuName
+        ,paotuirenwu.paotuirenwu_types as paotuirenwuTypes
+        ,paotuirenwu.paotuirenwu_new_money as paotuirenwuNewMoney
+        ,paotuirenwu.yonghu_id as paotuirenwuYonghuId
+        ,paotuirenwu.paotuirenwu_text as paotuirenwuText
+        ,paotuirenwu.paotuirenwu_status_types as paotuirenwuStatusTypes
+
+        FROM jiedanxiangqing  a
+        left JOIN jiedanyuan jiedanyuan ON a.jiedanyuan_id = jiedanyuan.id
+        left JOIN paotuirenwu paotuirenwu ON a.paotuirenwu_id = paotuirenwu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.paotuirenwuId != null and params.paotuirenwuId != ''">
+                and (
+                    a.paotuirenwu_id = #{params.paotuirenwuId}
+                )
+            </if>
+            <if test="params.jiedanyuanId != null and params.jiedanyuanId != ''">
+                and (
+                    a.jiedanyuan_id = #{params.jiedanyuanId}
+                )
+            </if>
+            <if test="params.jiedanxiangqingStatusTypes != null and params.jiedanxiangqingStatusTypes != ''">
+                and a.jiedanxiangqing_status_types = #{params.jiedanxiangqingStatusTypes}
+            </if>
+
+                <!-- 判断接单员的id不为空 -->
+            <if test=" params.jiedanyuanIdNotNull != '' and params.jiedanyuanIdNotNull != null and params.jiedanyuanIdNotNull != 'null' ">
+                and a.jiedanyuan_id IS NOT NULL
+            </if>
+            <if test=" params.jiedanyuanName != '' and params.jiedanyuanName != null and params.jiedanyuanName != 'null' ">
+                and jiedanyuan.jiedanyuan_name like CONCAT('%',#{params.jiedanyuanName},'%')
+            </if>
+            <if test=" params.jiedanyuanPhone != '' and params.jiedanyuanPhone != null and params.jiedanyuanPhone != 'null' ">
+                and jiedanyuan.jiedanyuan_phone like CONCAT('%',#{params.jiedanyuanPhone},'%')
+            </if>
+            <if test=" params.jiedanyuanEmail != '' and params.jiedanyuanEmail != null and params.jiedanyuanEmail != 'null' ">
+                and jiedanyuan.jiedanyuan_email like CONCAT('%',#{params.jiedanyuanEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and jiedanyuan.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and jiedanyuan.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiedanyuan.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiedanyuan.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断跑腿任务的id不为空 -->
+            <if test=" params.paotuirenwuIdNotNull != '' and params.paotuirenwuIdNotNull != null and params.paotuirenwuIdNotNull != 'null' ">
+                and a.paotuirenwu_id IS NOT NULL
+            </if>
+            <if test=" params.paotuirenwuUuidNumber != '' and params.paotuirenwuUuidNumber != null and params.paotuirenwuUuidNumber != 'null' ">
+                and paotuirenwu.paotuirenwu_uuid_number like CONCAT('%',#{params.paotuirenwuUuidNumber},'%')
+            </if>
+            <if test=" params.paotuirenwuName != '' and params.paotuirenwuName != null and params.paotuirenwuName != 'null' ">
+                and paotuirenwu.paotuirenwu_name like CONCAT('%',#{params.paotuirenwuName},'%')
+            </if>
+            <if test="params.paotuirenwuTypes != null  and params.paotuirenwuTypes != ''">
+                and paotuirenwu.paotuirenwu_types = #{params.paotuirenwuTypes}
+            </if>
+
+            <if test="params.paotuirenwuNewMoneyStart != null ">
+                <![CDATA[  and paotuirenwu.paotuirenwu_new_money >= #{params.paotuirenwuNewMoneyStart}   ]]>
+            </if>
+            <if test="params.paotuirenwuNewMoneyEnd != null ">
+                <![CDATA[  and paotuirenwu.paotuirenwu_new_money <= #{params.paotuirenwuNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and paotuirenwu.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test="params.shouhuodizhiId != null  and params.shouhuodizhiId != ''">
+                and paotuirenwu.shouhuodizhi_id = #{params.shouhuodizhiId}
+            </if>
+            <if test=" params.paotuirenwuText != '' and params.paotuirenwuText != null and params.paotuirenwuText != 'null' ">
+                and paotuirenwu.paotuirenwu_text like CONCAT('%',#{params.paotuirenwuText},'%')
+            </if>
+            <if test="params.paotuirenwuStatusTypes != null  and params.paotuirenwuStatusTypes != ''">
+                and paotuirenwu.paotuirenwu_status_types = #{params.paotuirenwuStatusTypes}
+            </if>
+
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
